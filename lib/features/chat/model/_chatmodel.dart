@@ -5,6 +5,16 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 class ChatModel extends ChangeNotifier {
   List<Map<String, String>> messages = [];
   bool _isLoading = false;
+  bool _isImageSelected=false;
+
+  set isImageSelected(bool value){
+    _isImageSelected=value;
+    notifyListeners();
+  }
+
+  bool get getImageSelectionData => _isImageSelected;
+
+  final List<Content> chatHistory = []; // Store chat history here
 
   set isLoading(bool value) {
     _isLoading = value;
@@ -30,22 +40,25 @@ class ChatModel extends ChangeNotifier {
         isLoading = true;
 
         // Load the API key from the environment
-        final String apiKey =  'AIzaSyCr-N6Cfk1kQSh03qZT9IR6mcCT-W_g9eo';
+        final String apiKey = 'AIzaSyCr-N6Cfk1kQSh03qZT9IR6mcCT-W_g9eo'; // Load from .env file
         if (apiKey.isEmpty) {
           print('API key is missing');
           return;
         }
 
-        // Initialize the generative model
+        // Initialize the generative model if not already initialized
         final model = GenerativeModel(
           model: 'gemini-1.5-flash',
           apiKey: apiKey,
           generationConfig: GenerationConfig(),
         );
 
-        // Send the message to the AI server
+        // Prepare content for the AI response
         var content = Content.text(message);
-        var chat = model.startChat(history: [content]);
+        chatHistory.add(content); // Add message to chat history
+
+        // Send the message to the AI server
+        var chat = model.startChat(history: chatHistory);
         var response = await chat.sendMessage(content);
 
         // Add the AI response to the chat
