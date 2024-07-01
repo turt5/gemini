@@ -33,31 +33,43 @@ class SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/logo.png',
-                  height: 40,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  'Gem',
-                  style: GoogleFonts.silkscreen(
-                      color: Colors.white,
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  'ini',
-                  style: GoogleFonts.silkscreen(
-                      color: colorScheme.primary,
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
+            Expanded(child: Transform.translate(
+              offset: Offset(0,25),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: 40,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    'Gem',
+                    style: GoogleFonts.silkscreen(
+                        color: Colors.white,
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'ini',
+                    style: GoogleFonts.silkscreen(
+                        color: colorScheme.primary,
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            )),
+            Container(
+              margin: EdgeInsets.only(bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Made by Limon with ❤')
+                ],
+              ),
             )
           ],
         ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../provider/_riverpod.dart';
@@ -43,7 +46,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (previous?.messages.length != next.messages.length) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent+300,
+            _scrollController.position.maxScrollExtent + 300,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
@@ -55,8 +58,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       drawer: Drawer(
         backgroundColor: Colors.grey.shade800,
         child: Center(
-          child:Text('Coming Soon', style: TextStyle(color: Colors.white))
-        ),
+            child: Text('Coming Soon', style: TextStyle(color: Colors.white))),
       ),
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
@@ -100,71 +102,83 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                       ),
                     )
                   : ListView.builder(
-                physics: BouncingScrollPhysics(),
-                controller: _scrollController,
-                itemCount: ref.watch(chatController).messages.length,
-                itemBuilder: (context, index) {
-                  final message = ref.watch(chatController).messages[index];
-                  return Column(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: message['sender'] == 'Me'
-                              ? colorScheme.primary
-                              : Colors.grey.shade900,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
+                      physics: BouncingScrollPhysics(),
+                      controller: _scrollController,
+                      itemCount: ref.watch(chatController).messages.length,
+                      itemBuilder: (context, index) {
+                        final message =
+                            ref.watch(chatController).messages[index];
+                        return Column(
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  message['sender']!,
-                                  style: TextStyle(
-                                    color: message['sender'] == 'Me'
-                                        ? Colors.grey.shade200
-                                        : Colors.grey,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Container(
-                                  width: width * 0.7, // Adjust the width as needed
-                                  child: MarkdownBody(
-                                    fitContent: true,
-                                    data: message['message'] ?? '',
-                                    styleSheet: MarkdownStyleSheet(
-                                      p: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: message['sender'] == 'Me'
+                                    ? colorScheme.primary
+                                    : Colors.grey.shade900,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        message['sender']!,
+                                        style: TextStyle(
+                                          color: message['sender'] == 'Me'
+                                              ? Colors.grey.shade200
+                                              : Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(height: 5),
+                                      Container(
+                                        width: width *
+                                            0.7, // Adjust the width as needed
+                                        child: MarkdownBody(
+                                          fitContent: true,
+                                          data: message['message'] ?? '',
+                                          styleSheet: MarkdownStyleSheet(
+                                            p: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      message.containsKey('image')? const SizedBox(height: 20,) :const SizedBox.shrink(),
+                                      message.containsKey('image')? Container(
+                                        height: 200,
+                                        width: 200,
+                                        child: Image.file(message['image'],fit: BoxFit.cover,),
+                                      ) :const SizedBox.shrink()
+                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
+                            if (ref.watch(chatController).messages.length - 1 ==
+                                    index &&
+                                ref.watch(chatController).isLoading)
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                padding: const EdgeInsets.all(10),
+                                height: 30,
+                                child: LoadingAnimationWidget.prograssiveDots(
+                                  color: Colors.grey,
+                                  size: 40,
+                                ),
+                              ),
                           ],
-                        ),
-                      ),
-                      if (ref.watch(chatController).messages.length - 1 == index &&
-                          ref.watch(chatController).isLoading)
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          padding: const EdgeInsets.all(10),
-                          height: 30,
-                          child: LoadingAnimationWidget.prograssiveDots(
-                            color: Colors.grey,
-                            size: 40,
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
+                        );
+                      },
+                    ),
             ),
           ),
           Container(
@@ -175,65 +189,174 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ),
               ),
             ),
-            height: 90,
-            child: Center(
-              child: SizedBox(
-                width: width * 0.8,
-                height: 60,
-                child: TextField(
-                  controller: _controller,
-                  keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.newline,
-                  maxLines: null,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    prefixIcon: Container(
-                      child: IconButton(
-                        icon: const FaIcon(
-                          FontAwesomeIcons.link,
-                          color: Colors.grey,
-                          size: 16,
-                        ),
-                        onPressed: () {},
+            height: ref.watch(chatController).getImage != null ? 170 : 90,
+            child: ref.watch(chatController).getImage != null
+                ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.file(
+                            ref.watch(chatController).getImageAsFile()!,
+                            width: 40,
+                            height: 40,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                              '${ref.watch(chatController).getImage!.name}'),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              ref.read(chatController).clearImage();
+                            },
+                            icon: Icon(
+                              Icons.close,
+                              size: 20,
+                            ),
+                          )
+                        ],
                       ),
-                    ),
-                    hintText: 'Type your message',
-                    hintStyle:
-                        const TextStyle(color: Colors.grey, fontSize: 14),
-                    filled: true,
-                    fillColor: Colors.grey.shade900,
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    suffixIcon: GestureDetector(
-                      onTap: () async {
-                        String text = _controller.text.trim();
-                        if (text.isNotEmpty) {
-                          ref.read(chatController).addMessage(text, 'Me');
-                          _controller.clear();
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 15, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          borderRadius: BorderRadius.circular(5),
+                      const SizedBox(height: 20,),
+                      SizedBox(
+                        width: width * 0.8,
+                        height: 60,
+                        child: TextField(
+                          controller: _controller,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          maxLines: null,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            prefixIcon: Container(
+                              child: IconButton(
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.link,
+                                  color: Colors.grey,
+                                  size: 16,
+                                ),
+                                onPressed: () async {
+                                  final ImagePicker _picker = ImagePicker();
+                                  try {
+                                    final pickedFile = await _picker.pickImage(
+                                        source: ImageSource.gallery);
+                                    ref.read(chatController).image = pickedFile;
+                                  } catch (e) {
+                                    print('Error picking image: $e');
+                                  }
+                                },
+                              ),
+                            ),
+                            hintText: 'Type your message',
+                            hintStyle:
+                            const TextStyle(color: Colors.grey, fontSize: 14),
+                            filled: true,
+                            fillColor: Colors.grey.shade900,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            suffixIcon: GestureDetector(
+                              onTap: () async {
+                                String text = _controller.text.trim();
+                                if (text.isNotEmpty) {
+                                  ref.read(chatController).addMessageWithImage(text, 'Me');
+                                  ref.read(chatController).clearImage();
+                                  _controller.clear();
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 15, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                margin: const EdgeInsets.only(
+                                    right: 10, left: 10, top: 10, bottom: 10),
+                                child: const FaIcon(
+                                  FontAwesomeIcons.paperPlane,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                        margin: const EdgeInsets.only(
-                            right: 10, left: 10, top: 10, bottom: 10),
-                        child: const FaIcon(
-                          FontAwesomeIcons.paperPlane,
-                          color: Colors.white,
-                          size: 16,
+                      )
+                    ],
+                  )
+                : Center(
+                    child: SizedBox(
+                      width: width * 0.8,
+                      height: 60,
+                      child: TextField(
+                        controller: _controller,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        maxLines: null,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          prefixIcon: Container(
+                            child: IconButton(
+                              icon: const FaIcon(
+                                FontAwesomeIcons.link,
+                                color: Colors.grey,
+                                size: 16,
+                              ),
+                              onPressed: () async {
+                                final ImagePicker _picker = ImagePicker();
+                                try {
+                                  final pickedFile = await _picker.pickImage(
+                                      source: ImageSource.gallery);
+                                  ref.read(chatController).image = pickedFile;
+                                } catch (e) {
+                                  print('Error picking image: $e');
+                                }
+                              },
+                            ),
+                          ),
+                          hintText: 'Type your message',
+                          hintStyle:
+                              const TextStyle(color: Colors.grey, fontSize: 14),
+                          filled: true,
+                          fillColor: Colors.grey.shade900,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          suffixIcon: GestureDetector(
+                            onTap: () async {
+                              String text = _controller.text.trim();
+                              if (text.isNotEmpty) {
+                                ref.read(chatController).addMessage(text, 'Me');
+                                _controller.clear();
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              margin: const EdgeInsets.only(
+                                  right: 10, left: 10, top: 10, bottom: 10),
+                              child: const FaIcon(
+                                FontAwesomeIcons.paperPlane,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
           )
         ],
       ),
