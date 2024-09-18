@@ -1,16 +1,22 @@
-# gemini
+# Gemini
 
-A new Flutter project.
+This is a chatbot project using Google's Gemini model, designed to deliver continuous and context-aware conversations. It is built using Flutter, providing cross-platform support for both iOS and Android.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project serves as a starting point for building a conversational AI chatbot using Google's Gemini API.
 
-A few resources to get you started if this is your first Flutter project:
+### Prerequisites
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Flutter SDK**: [Install Flutter](https://docs.flutter.dev/get-started/install)
+- **Dart SDK**: Included with Flutter installation
+- **IDE**: [Android Studio](https://developer.android.com/studio) or [Visual Studio Code](https://code.visualstudio.com/)
+- **Google Gemini API**: Ensure you have access to the Gemini API from Google.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/turt5/gemini.git
+   cd gemini
+   ```
